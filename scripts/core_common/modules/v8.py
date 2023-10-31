@@ -48,6 +48,9 @@ def is_use_clang():
   if (gcc_version >= 6000):
     is_clang = "true"
 
+  if (-1 != platform.machine().find("loongarch64")):
+    is_clang = "false"
+
   print("gcc version: " + str(gcc_version) + ", use clang:" + is_clang)
   return is_clang
 

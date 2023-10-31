@@ -16,11 +16,12 @@ def make_args(args, platform, is_64=True, is_debug=False):
     args_copy.append("target_cpu=\\\"x86\\\"") 
     args_copy.append("v8_target_cpu=\\\"x86\\\"")
 
-  if (platform == "linux_arm64"):
+  if (platform == "linux_loongarch64"):
     args_copy = args[:]
-    args_copy.append("target_cpu=\\\"arm64\\\"")
-    args_copy.append("v8_target_cpu=\\\"arm64\\\"")
-    args_copy.append("use_sysroot=true")
+    args_copy.append("target_cpu=\\\"la64\\\"")
+    args_copy.append("v8_target_cpu=\\\"la64\\\"")
+    args_copy.append("is_clang=false")
+    args_copy.append("use_sysroot=false")
   
   if is_debug:
     args_copy.append("is_debug=true")
@@ -93,18 +94,20 @@ def make():
     base.set_env("GYP_MSVS_VERSION", config.option("vs-version"))
 
   if not base.is_dir("v8"):
-    base.cmd("./depot_tools/fetch", ["v8"], True)
-    base.copy_dir("./v8/third_party", "./v8/third_party_new")
-    if ("windows" == base.host_platform()):
-      os.chdir("v8")
-      base.cmd("git", ["config", "--system", "core.longpaths", "true"])
-      os.chdir("../")
-    v8_branch_version = "remotes/branch-heads/8.9"
-    if ("mac" == base.host_platform()):
-      v8_branch_version = "remotes/branch-heads/9.9"
-    base.cmd("./depot_tools/gclient", ["sync", "-r", v8_branch_version], True)
-    base.cmd("gclient", ["sync", "--force"], True)
-    base.copy_dir("./v8/third_party_new/ninja", "./v8/third_party/ninja")
+    print("please install v8 8.9")
+    sys.exit(0)
+    #base.cmd("./depot_tools/fetch", ["v8"], True)
+    #base.copy_dir("./v8/third_party", "./v8/third_party_new")
+    #if ("windows" == base.host_platform()):
+    #  os.chdir("v8")
+    #  base.cmd("git", ["config", "--system", "core.longpaths", "true"])
+    #  os.chdir("../")
+    #v8_branch_version = "remotes/branch-heads/8.9"
+    #if ("mac" == base.host_platform()):
+    #  v8_branch_version = "remotes/branch-heads/9.9"
+    #base.cmd("./depot_tools/gclient", ["sync", "-r", v8_branch_version], True)
+    #base.cmd("gclient", ["sync", "--force"], True)
+    #base.copy_dir("./v8/third_party_new/ninja", "./v8/third_party/ninja")
 
   if ("windows" == base.host_platform()):
     base.replaceInFile("v8/build/config/win/BUILD.gn", ":static_crt", ":dynamic_crt")
@@ -128,7 +131,7 @@ def make():
              "treat_warnings_as_errors=false"]
 
   if config.check_option("platform", "linux_64"):
-    base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")])
+    base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux_loongarch64", False)])
     base.cmd("ninja", ["-C", "out.gn/linux_64"])
 
   if config.check_option("platform", "linux_32"):

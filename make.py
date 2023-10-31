@@ -21,6 +21,12 @@ config.parse()
 base_dir = base.get_script_dir(__file__)
 
 base.set_env("BUILD_PLATFORM", config.option("platform"))
+base.set_env("GCLIENT_PY3","0")
+base.set_env("USE_PYTHON3","0")
+base.set_env("DEPOT_TOOLS_UPDATE","0")
+base.set_env("DEPOT_TOOLS_BOOTSTRAP_PYTHON3","0")
+base.set_env("SKIP_GCE_AUTH_FOR_GIT","1")
+base.set_env("KERNEL_BITS","64")
 
 # branding
 if ("1" != base.get_env("OO_RUNNING_BRANDING")) and ("" != config.option("branding")):
@@ -55,6 +61,10 @@ base.check_build_version(base_dir)
 if ("1" == config.option("update")):
   repositories = base.get_repositories()
   base.update_repositories(repositories)
+  base.cmd("sed -n -e '/aarch/{s/aarch/loongarch/;p;n;p;n;p;n;s/arm/loongarch/}' -e 'p' -i", [base_dir + "/../core/Common/base.pri"], "> /dev/null")
+  base.cmd("sed -i 's/_32/_64/g'", [base_dir + "/../core/Common/3dParty/v8/v8.pri"])
+  base.cmd("sed -n -e '/platform == \"linux_arm64\"/{s/arm/loongarch/;p;n;p;n;s/arm/la/;p;n;s/arm/la/;p;n;s/true/false/}' -e 'p' -i", [base_dir + "/../build_tools/scripts/core_common/modules/v8_89.py"])
+#  base.cmd("sed '/is_dir(\"v8\")/a\\    print(\"please install v8 8.9\")\\n    sys.exit(0)' -i", [base_dir + "/../build_tools/scripts/core_common/modules/v8_89.py"])
 
 base.configure_common_apps()
 
